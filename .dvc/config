@@ -1,0 +1,7 @@
+[core]
+    autostage = true
+    remote = myremote
+['remote "myremote"']
+    url = gdrive://1X_AfSEn3stMdy4XqyRwIVa_9WHrZ7SAG/dvcstore
+    gdrive_use_service_account = true
+    gdrive_service_account_json_file_path = ../google_console_credentials.json

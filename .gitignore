@@ -1,3 +1,4 @@
 data/
 !data/2.processed/
 /data
+google_console_credentials.json
