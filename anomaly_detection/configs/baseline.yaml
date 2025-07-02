@@ -1,0 +1,47 @@
+# config.yaml - Place this in a configs directory
+defaults:
+  - _self_
+
+experiment:
+  name: mobilenetv3
+
+# Model parameters from anomaly_detection/models/baseline.py
+model_parameters:
+  num_classes: 6
+  learning_rate: 1e-3
+  weight_decay: 1e-4
+  pretrained: true
+  freeze_backbone: false
+
+training:
+  accelerator: "cpu"
+  devices: 4
+  num_epochs: 150
+  batch_size: 8
+  intended_batch_size: 256
+  num_workers: 4
+  check_val_every_n_epoch: 10
+
+testing:
+  accelerator: "cpu"
+  devices: 4
+  batch_size: 8
+  num_workers: 4
+
+# Dataset parameters
+dataset:
+  directory: "data/0.raw/NEU-DET/"
+  version: "latest"
+
+# Output parameters
+output:
+  output_dir: ./output
+
+# MLFlow parameters
+mlflow:
+  experiment_name: mobilenetv3_training
+  tracking_uri: file:./ml-runs
+
+# Transform parameters
+transform:
+  resize_size: [224, 224]

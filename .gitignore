@@ -1,4 +1,7 @@
-data/
-!data/2.processed/
 /data
 google_console_credentials.json
+/*.egg-info
+*__pycache__*
+/outputs
+/ml-runs
+git_diff.txt
