@@ -68,7 +68,8 @@ def main(cfg: DictConfig):
 
     # Initialize datasets and dataloaders
     full_train_dataset = ImageFolder(
-        cfg.dataset.directory + "/train/images", transform=transform
+        os.path.join(cfg.dataset.directory, "train", "images"),
+        transform=transform,
     )
 
     # Method 1: Simple random split (may not preserve class balance perfectly)
@@ -79,7 +80,8 @@ def main(cfg: DictConfig):
     )
 
     test_dataset = ImageFolder(
-        cfg.dataset.directory + "/validation/images", transform=transform
+        os.path.join(cfg.dataset.directory, "validation", "images"),
+        transform=transform,
     )
 
     train_loader = DataLoader(
@@ -109,12 +111,20 @@ def main(cfg: DictConfig):
         persistent_workers=True,
     )
 
+    print(
+        "cfg.training.check_val_every_n_epoch:",
+        cfg.training.check_val_every_n_epoch,
+    )
+
     # Model checkpointing
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(cfg.output.output_dir, "checkpoints"),
         filename="model-{epoch:02d}-{val_loss:.2f}",
         save_top_k=1,
         save_last=True,
+        monitor="val_loss",
+        mode="min",
+        verbose=True,
     )
 
     print("Intended batch size:", cfg.training.intended_batch_size)
@@ -133,15 +143,13 @@ def main(cfg: DictConfig):
 
     # Initialize trainer
     trainer = pl.Trainer(
-        accelerator=cfg.training.accelerator,
-        devices=cfg.training.devices,
         max_epochs=cfg.training.num_epochs,
         logger=mlflow_logger,
         check_val_every_n_epoch=cfg.training.check_val_every_n_epoch,
         callbacks=[model_checkpoint_callback],
         accumulate_grad_batches=accumulated_grad_batches,
         precision=precision,
-        log_every_n_steps=5,
+        log_every_n_steps=-1,
     )
 
     # Log the model for deployment

@@ -40,6 +40,17 @@ class BaselineModule(pl.LightningModule):
             for param in self.model.features.parameters():
                 param.requires_grad = False
 
+        # Set the device for the model
+        self.accuracy_metric_func = Accuracy(
+            task="multiclass", num_classes=num_classes, average="macro"
+        ).to(self.device)
+        self.f1_score_metric_func = F1Score(
+            task="multiclass", num_classes=num_classes, average="macro"
+        ).to(self.device)
+        self.recall_metric_func = Recall(
+            task="multiclass", num_classes=num_classes, average="macro"
+        ).to(self.device)
+
     def forward(self, x):
         return self.model(x)
 
@@ -51,31 +62,24 @@ class BaselineModule(pl.LightningModule):
 
         preds = torch.argmax(logits, dim=1)
 
-        self.log(
-            f"{prefix}_loss",
-            loss,
-            sync_dist=True,
-        )
+        self.log(f"{prefix}_loss", loss, sync_dist=True, on_epoch=True)
         self.log(
             f"{prefix}_acc",
-            Accuracy(task="multiclass", num_classes=self.hparams.num_classes)(
-                preds, y
-            ),
+            self.accuracy_metric_func(preds, y),
             sync_dist=True,
+            on_epoch=True,
         )
         self.log(
             f"{prefix}_f1",
-            F1Score(task="multiclass", num_classes=self.hparams.num_classes)(
-                preds, y
-            ),
+            self.f1_score_metric_func(preds, y),
             sync_dist=True,
+            on_epoch=True,
         )
         self.log(
             f"{prefix}_recall",
-            Recall(task="multiclass", num_classes=self.hparams.num_classes)(
-                preds, y
-            ),
+            self.recall_metric_func(preds, y),
             sync_dist=True,
+            on_epoch=True,
         )
 
         return loss
